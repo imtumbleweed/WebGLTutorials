@@ -69,6 +69,8 @@ function InitializeWebGL()
             // Clear out the viewport with solid black color
             gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
 
+            return gl;
+
         }
         else
             console.log("Your browser doesn't support WebGL.");
