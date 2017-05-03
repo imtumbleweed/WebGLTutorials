@@ -1,12 +1,12 @@
 <!doctype html>
 <html>
 <head>
-    <title>Tutorial 4 - Draw Triangle ("Hello Triangle")</title>
+    <title>Tutorial 6 - Algorithmic Cube</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <script src = 'http://www.tigrisgames.com/js/jquery.js' type = 'text/javascript'></script>
     <script src = 'http://www.tigrisgames.com/js/ui.js' type = 'text/javascript'></script>
-    <script src = 'http://www.tigrisgames.com/fx/gl.js?v=1'></script>
-    <script src = 'http://www.tigrisgames.com/fx/shaders.js?v=1'></script>
+    <script src = 'http://www.tigrisgames.com/fx/gl.js'></script>
+    <script src = 'http://www.tigrisgames.com/fx/shaders.js'></script>
 
     <!-- Standard vertex shader //-->
     <script type = "glsl" id = "standard-vs">void main() {
@@ -47,17 +47,35 @@
             console.log("webGLResourcesLoaded(): All webGL shaders have finished loading!");
 
             // Specify triangle vertex data:
-            var vertices = [
-                -0.0,  0.5, 0.0, // Vertex A (x,y,z)
+            var vertices = new Float32Array([
+
+                0.0,  0.5, 0.0, // Vertex A (x,y,z)
                 -0.5, -0.5, 0.0, // Vertex B (x,y,z)
-                 0.5, -0.5, 0.0  // Vertex C (x,y,z)
-            ];
+                0.5, -0.5, 0.0,  // Vertex C (x,y,z)
+
+                0.0,  0.5, 0.0, // Vertex A (x,y,z)
+                0.5, -0.5, 0.0, // Vertex B (x,y,z)
+                0.0,  0.5, 0.0  // Vertex C (x,y,z)
+
+            ]);
+
+            var colors = new Float32Array([
+                1.0, 0.0, 0.0,  // Vertex A (r,g,b) -- red
+                0.0, 1.0, 0.0,  // Vertex B (r,g,b) -- green
+                0.0, 0.0, 1.0,   // Vertex C (r,g,b) -- blue
+                1.0, 0.0, 0.0,  // Vertex A (r,g,b) -- red
+                0.0, 1.0, 0.0,  // Vertex B (r,g,b) -- green
+                0.0, 0.0, 1.0   // Vertex C (r,g,b) -- blue
+            ]);
 
             var indices = [0, 1, 2];
 
             // Create buffer objects for storing triangle vertex and index data
             var vertexbuffer = gl.createBuffer();
+            var colorbuffer = gl.createBuffer();
             var indexbuffer = gl.createBuffer();
+
+            var BYTESIZE = vertices.BYTES_PER_ELEMENT;
 
             // Bind and create enough room for our data on respective buffers
 
@@ -65,6 +83,19 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
             // Send our vertex data to the buffer using floating point array
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+            var coords = gl.getAttribLocation(Shader.standardProgram, "a_Position");
+            gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, BYTESIZE*3, 0);
+            gl.enableVertexAttribArray(coords); // Enable it
+            // We're done; now we have to unbind the buffer
+            gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+            // Bind it to ARRAY_BUFFER
+            gl.bindBuffer(gl.ARRAY_BUFFER, colorbuffer);
+            // Send our vertex data to the buffer using floating point array
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+            var colors = gl.getAttribLocation(Shader.standardProgram, "a_Color");
+            gl.vertexAttribPointer(colors, 3, gl.FLOAT, false, BYTESIZE*3, 0);
+            gl.enableVertexAttribArray(colors); // Enable it
             // We're done; now we have to unbind the buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
@@ -72,26 +103,9 @@
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
             // Send index (indices) data to this buffer
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-            // We're done; unbind, we no longer need the buffer object
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
-            // Associate shaders with the buffer objects we just created
-
-            // Bind our vertex and index buffers to their respective buffer types
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
 
             // Use our standard shader program for rendering this triangle
-            gl.useProgram( Shader.standardProgram );
-
-            // Get attribute location
-            var coords = gl.getAttribLocation(Shader.standardProgram, "a_Position");
-
-            // Pointer to the currently bound VBO (vertex buffer object)
-            gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, 0, 0);
-
-            // Enable it
-            gl.enableVertexAttribArray(coords);
+            gl.useProgram( Shader.vertexColorProgram );
 
             // Start main drawing loop
             var T = setInterval(function() {

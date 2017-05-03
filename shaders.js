@@ -16,6 +16,7 @@ class ShaderProgramManager { // Globally available shader programs
     constructor() {
         this.standardProgram = null;            // Draw static point in the middle
         this.globalDrawingProgram = null;       // Draw point defined by global parameters
+        this.vertexColorProgram = null;            // Draw static point in the middle
     }
 }
 
@@ -38,12 +39,14 @@ function CreateShaderPrograms(gl) {
 
 var shaders = [ // Enumerate shader filenames
     "standard",         // this assumes "standard.vs" & "standard.frag" are available in "shaders" directory
-    "global"            // this assumes "global.vs" & "global.frag" are available in "shaders" directory
+    "global",           // this assumes "global.vs" & "global.frag" are available in "shaders" directory
+    "vertex"
 ];
 
 var shader_name = [ // Enumerate shader program names
     "standardProgram",
-    "globalDrawingProgram"
+    "globalDrawingProgram",
+    "vertexColorProgram"
 ];
 
 // Scroll through the list, loading shader pairs
@@ -66,31 +69,48 @@ function LoadShader(gl, shaderName, filenameVertexShader, filenameFragmentShader
     var v = ""; // Placeholders for the shader pair
     var f = "";
 
-    $.ajax( { // Load the vertex shader
-        url : filename_vs, type : "POST",
-        success : function( msg ) {
+    // Now execute two Ajax calls in a row to grab the vertex and
+    // fragment shaders from the file location
 
-            v = msg;
+    var xmlhttp = new XMLHttpRequest();
 
-            $.ajax( { // Load the corresponding fragment shader
-                url : filename_fs,  type : "POST",
-                success : function( msg ) {
+    // Execute first Ajax call to load the vertex shader
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE) {
+            if (xmlhttp.status == 200) {
 
-                    f = msg;
+                v = xmlhttp.responseText;
 
-                    console.log("Initializing Shader Program: " + filename_vs + ", " + filename_fs);
+                // Execute second Ajax call to load the fragment shader
+                var xmlhttp2 = new XMLHttpRequest();
+                xmlhttp2.onreadystatechange = function () {
+                    if (xmlhttp2.readyState == XMLHttpRequest.DONE)
+                        if (xmlhttp2.status == 200) {
 
-                    Shader[ shaderName ] = InitializeShader(gl, v, f);
+                            f = xmlhttp2.responseText;
 
-                    // Is this the last shader in the queue?
-                    // If so, execute "all shaders loaded" event
+                            //console.log(v);
+                            //console.log(f);
 
-                    if (index == shaders.length - 1)
-                        window.webGLResourcesLoaded();
-                }
-            });
+                            console.log("Initializing Shader Program: " + filename_vs + ", " + filename_fs);
+                            Shader[ shaderName ] = InitializeShader(gl, v, f);
+                            // Is this the last shader in the queue?
+                            // If so, execute "all shaders loaded" event
+                            if (index == shaders.length - 1) {
+
+                                setTimeout(function () {
+                                    window.webGLResourcesLoaded()
+                                }, 500); // .5 sec delay
+                            }
+                        }
+                };
+                xmlhttp2.open("GET", filename_fs, true);
+                xmlhttp2.send();
+            }
         }
-    });
+    };
+    xmlhttp.open("GET", filename_vs, true);
+    xmlhttp.send();
 }
 
 function InitializeShader(gl, source_vs, source_frag)
@@ -110,18 +130,23 @@ function InitializeShader(gl, source_vs, source_frag)
 
     // Compile vertex shader
     if (!gl.getShaderParameter(shader_vs, gl.COMPILE_STATUS)) {
-        alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader_vs));
+        console.log(gl.getShaderInfoLog(shader_vs));
         error = true;
     }
 
     // Compile fragment shader
-    if (!gl.getShaderParameter(shader_vs, gl.COMPILE_STATUS)) {
-        alert("An error occurred compiling the shaders: " + gl.getShaderInfoLog(shader_vs));
+    if (!gl.getShaderParameter(shader_frag, gl.COMPILE_STATUS)) {
+        console.log(gl.getShaderInfoLog(shader_frag));
         error = true;
     }
 
     // Create shader program consisting of shader pair
     program = gl.createProgram();
+
+    //console.log("program=");
+    //console.log(program);
+    var ret = gl.getProgramInfoLog(program);
+    if (ret != "") console.log(ret);
 
     // Attach shaders to the program; these methods do not have a return value
     gl.attachShader(program, shader_vs);
@@ -132,6 +157,8 @@ function InitializeShader(gl, source_vs, source_frag)
         console.log("gl.linkProgram(program) failed with error code 0.");
         error = true;
     }
+
+
 
     if (error)  {
         console.log('Failed to initialize shader.');
