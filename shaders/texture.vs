@@ -1,0 +1,15 @@
+precision mediump float;
+attribute vec4 a_Position;
+attribute vec4 a_Color;
+attribute vec2 a_Texture;
+
+varying vec4 color;
+varying vec2 texture;
+
+void main()
+{
+    gl_Position = a_Position;
+
+    color = a_Color;
+    texture = a_Texture;
+}
