@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Tutorial 6 - Algorithmic Cube</title>
+    <title>Tutorial 6 - Drawing Multiple (Two) Triangles</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <script src = 'http://www.tigrisgames.com/js/jquery.js' type = 'text/javascript'></script>
     <script src = 'http://www.tigrisgames.com/js/ui.js' type = 'text/javascript'></script>
@@ -53,22 +53,23 @@
                 -0.5, -0.5, 0.0, // Vertex B (x,y,z)
                 0.5, -0.5, 0.0,  // Vertex C (x,y,z)
 
-                0.0,  0.5, 0.0, // Vertex A (x,y,z)
-                0.5, -0.5, 0.0, // Vertex B (x,y,z)
-                0.0,  0.5, 0.0  // Vertex C (x,y,z)
-
+                0.05+0.0,  0.75, 0.0, // Vertex A (x,y,z)
+                0.75-0.5, -0.75, 0.0, // Vertex B (x,y,z)
+                0.15+0.5, -0.75, 0.0,  // Vertex C (x,y,z)
             ]);
 
             var colors = new Float32Array([
+
                 1.0, 0.0, 0.0,  // Vertex A (r,g,b) -- red
                 0.0, 1.0, 0.0,  // Vertex B (r,g,b) -- green
                 0.0, 0.0, 1.0,   // Vertex C (r,g,b) -- blue
-                1.0, 0.0, 0.0,  // Vertex A (r,g,b) -- red
+
+                0.0, 0.0, 1.0,  // Vertex A (r,g,b) -- red
                 0.0, 1.0, 0.0,  // Vertex B (r,g,b) -- green
-                0.0, 0.0, 1.0   // Vertex C (r,g,b) -- blue
+                1.0, 0.0, 0.0   // Vertex C (r,g,b) -- blue
             ]);
 
-            var indices = [0, 1, 2];
+            var indices = [0, 1, 2, 3, 4, 5];
 
             // Create buffer objects for storing triangle vertex and index data
             var vertexbuffer = gl.createBuffer();
@@ -83,7 +84,7 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
             // Send our vertex data to the buffer using floating point array
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-            var coords = gl.getAttribLocation(Shader.standardProgram, "a_Position");
+            var coords = gl.getAttribLocation(Shader.vertexColorProgram, "a_Position");
             gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, BYTESIZE*3, 0);
             gl.enableVertexAttribArray(coords); // Enable it
             // We're done; now we have to unbind the buffer
@@ -93,7 +94,7 @@
             gl.bindBuffer(gl.ARRAY_BUFFER, colorbuffer);
             // Send our vertex data to the buffer using floating point array
             gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
-            var colors = gl.getAttribLocation(Shader.standardProgram, "a_Color");
+            var colors = gl.getAttribLocation(Shader.vertexColorProgram, "a_Color");
             gl.vertexAttribPointer(colors, 3, gl.FLOAT, false, BYTESIZE*3, 0);
             gl.enableVertexAttribArray(colors); // Enable it
             // We're done; now we have to unbind the buffer
@@ -119,7 +120,7 @@
                 gl.clear(gl.COLOR_BUFFER_BIT);
 
                 // Draw triangle
-                gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT,0);
+                gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
 
             });
 
