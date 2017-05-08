@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Tutorial 9 - WebGL Matrix Operations (3D Cube Rotation)</title>
+    <title>Tutorial 10 - Loading 3D Model From OBJ Format</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <script src = 'http://www.tigrisgames.com/js/jquery.js' type = 'text/javascript'></script>
     <script src = 'http://www.tigrisgames.com/js/ui.js' type = 'text/javascript'></script>
@@ -122,7 +122,7 @@
 
                 gl.clear(gl.COLOR_BUFFER_BIT);
 
-                // Set active texture to pass into the shader
+                // Set "brick.png" as active texture to pass into the shader
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, brick.texture);
                 gl.uniform1i(gl.getUniformLocation(Shader.textureMapProgram, 'image'), 0);

@@ -6,10 +6,14 @@ attribute vec2 a_Texture;
 varying vec4 color;
 varying vec2 texture;
 
+uniform mat4 Projection;
+uniform mat4 ModelView;
+
 void main()
 {
-    gl_Position = a_Position;
+    gl_Position = Projection * ModelView * a_Position;
 
     color = a_Color;
+
     texture = a_Texture;
 }

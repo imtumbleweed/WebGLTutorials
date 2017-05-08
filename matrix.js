@@ -162,9 +162,9 @@ CanvasMatrix4.prototype.getAsArray = function()
     ];
 }
 
-CanvasMatrix4.prototype.getAsWebGLFloatArray = function()
+CanvasMatrix4.prototype.getAsFloat32Array = function()
 {
-    return new WebGLFloatArray(this.getAsArray());
+    return new Float32Array(this.getAsArray());
 }
 
 CanvasMatrix4.prototype.makeIdentity = function()
