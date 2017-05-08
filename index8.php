@@ -6,20 +6,10 @@
     <script src = 'http://www.tigrisgames.com/js/jquery.js' type = 'text/javascript'></script>
     <script src = 'http://www.tigrisgames.com/js/ui.js' type = 'text/javascript'></script>
     <script src = 'http://www.tigrisgames.com/fx/gl.js'></script>
-    <script src = 'http://www.tigrisgames.com/fx/shaders.js'></script>
+    <script src = 'http://www.tigrisgames.com/fx/shaders.js?v=5'></script>
     <script src = 'http://www.tigrisgames.com/fx/primitives.js?v=1'></script>
-
-    <!-- Standard vertex shader //-->
-    <script type = "glsl" id = "standard-vs">void main() {
-            gl_Position = vec4(0.0, 0.0, 0.0, 1);
-            gl_PointSize = 10.0;
-        }
-    </script>
-    <!-- Fragment vertex shader //-->
-    <script type = "glsl" id = "standard-frag">void main() {
-            gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-        }
-    </script>
+    <script src = 'http://www.tigrisgames.com/fx/texture.js'></script>
+    <script src = 'http://www.tigrisgames.com/fx/matrix.js'></script>
     <script type = "text/javascript">
 
         /* -- Gl functions -- */
@@ -39,13 +29,15 @@
             else { // Load a shader from "shaders" folder
 
                 CreateShadersFromFile( gl );
+
+                LoadTextures();
             }
         });
 
         // An event that fires when all shader resources finish loading in CreateShadersFromFile
         window.webGLResourcesLoaded = function() {
 
-            console.log("webGLResourcesLoaded(): All webGL shaders have finished loading!");
+            console.log("webGLResourcesLoaded(): All WebGL shaders have finished loading!");
 
             // Specify triangle vertex data:
             var vertices = makeCube();
@@ -59,47 +51,47 @@
             // Create buffer objects for storing triangle vertex and index data
             var vertexbuffer = gl.createBuffer();
             var colorbuffer = gl.createBuffer();
+            var texturebuffer = gl.createBuffer();
             var indexbuffer = gl.createBuffer();
 
             var BYTESIZE = vertices.BYTES_PER_ELEMENT;
 
             // Bind and create enough room for our data on respective buffers
 
-            // Bind it to ARRAY_BUFFER
+            // Bind vertex buffer to ARRAY_BUFFER
             gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
             // Send our vertex data to the buffer using floating point array
             gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-            var coords = gl.getAttribLocation(Shader.vertexColorProgram, "a_Position");
-            gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, BYTESIZE*3, 0);
+            var coords = gl.getAttribLocation(Shader.textureMapProgram, "a_Position");
+            gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(coords); // Enable it
             // We're done; now we have to unbind the buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-            // Bind it to ARRAY_BUFFER
+            // Bind colorbuffer to ARRAY_BUFFER
             gl.bindBuffer(gl.ARRAY_BUFFER, colorbuffer);
             // Send our vertex data to the buffer using floating point array
             gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-            var colors = gl.getAttribLocation(Shader.vertexColorProgram, "a_Color");
-            gl.vertexAttribPointer(colors, 3, gl.FLOAT, false, BYTESIZE*3, 0);
-            gl.enableVertexAttribArray(colors); // Enable it
+            var col = gl.getAttribLocation(Shader.textureMapProgram, "a_Color");
+            gl.vertexAttribPointer(col, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(col); // Enable it
             // We're done; now we have to unbind the buffer
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-            // Bind it to ARRAY_BUFFER
-            gl.bindBuffer(gl.ARRAY_BUFFER, uvs);
-            // Send our vertex data to the buffer using floating point array
+            // Bind texturebuffer to ARRAY_BUFFER
+            gl.bindBuffer(gl.ARRAY_BUFFER, texturebuffer);
+            // Send our texture image data to the buffer using floating point array
             gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
-            var uv = gl.getAttribLocation(Shader.vertexColorProgram, "a_Texture");
-            gl.vertexAttribPointer(uv, 2, gl.FLOAT, false, BYTESIZE*2, 0);
+            var uv = gl.getAttribLocation(Shader.textureMapProgram, "a_Texture");
+            gl.vertexAttribPointer(uv, 2, gl.FLOAT, false, 0, 0);
             gl.enableVertexAttribArray(uv); // Enable it
-            // We're done; now we have to unbind the buffer
+            // We're done; now we have to unbind the buffer (optional but probably a good idea)
             gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-            // Bind it to ELEMENT_ARRAY_BUFFER
+            // Bind indices to ELEMENT_ARRAY_BUFFER
             gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
             // Send index (indices) data to this buffer
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
-
             // Use our standard shader program for rendering this triangle
             gl.useProgram( Shader.textureMapProgram );
 
@@ -113,6 +105,11 @@
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
                 gl.clear(gl.COLOR_BUFFER_BIT);
+
+                // Set active texture to pass into the shader
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, road.texture);
+                gl.uniform1i(gl.getUniformLocation(Shader.textureMapProgram, 'image'), 0);
 
                 // Draw triangle
                 gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
