@@ -12,6 +12,9 @@
 
  */
 
+// Set to true once all shaders finished loading asyncronously
+window.ShadersFinishedLoading = false;
+
 class ShaderProgramManager { // Globally available shader programs
     constructor() {
         this.standardProgram = null;            // Draw static point in the middle
@@ -54,8 +57,11 @@ var shader_name = [ // Enumerate shader program names
 
 // Scroll through the list, loading shader pairs
 function CreateShadersFromFile( gl ) {
+
+    var cache_Bust = new Date().getTime()/1000|0;
+
     for (i in shaders)
-        LoadShader(gl, shader_name[i], shaders[i] + ".vs", shaders[i] + ".frag",
+        LoadShader(gl, shader_name[i], shaders[i] + ".vs?v=" + cache_Bust, shaders[i] + ".frag?v=" + cache_Bust,
             i // pass in the index of the currently loading shader,
               // this way we can determine when last shader has finished loading
         );
@@ -92,17 +98,15 @@ function LoadShader(gl, shaderName, filenameVertexShader, filenameFragmentShader
 
                             f = xmlhttp2.responseText;
 
-                            //console.log(v);
-                            //console.log(f);
-
-                            console.log("Initializing Shader Program: " + filename_vs + ", " + filename_fs);
-                            Shader[ shaderName ] = InitializeShader(gl, v, f);
+                            Shader[ shaderName ] = InitializeShader(gl, v, f, filenameVertexShader, filenameFragmentShader);
                             // Is this the last shader in the queue?
                             // If so, execute "all shaders loaded" event
                             if (index == shaders.length - 1) {
 
                                 setTimeout(function () {
-                                    window.webGLResourcesLoaded()
+
+                                    window.ShadersFinishedLoading = true;
+
                                 }, 500); // .5 sec delay
                             }
                         }
@@ -116,9 +120,9 @@ function LoadShader(gl, shaderName, filenameVertexShader, filenameFragmentShader
     xmlhttp.send();
 }
 
-function InitializeShader(gl, source_vs, source_frag)
+function InitializeShader(gl, source_vs, source_frag, fv, ff)
 {
-    //console.log("InitializeShader(...)");
+    ErrorMessage = "Initializing Shader Program: <" + fv + ">, <" + ff + ">";
 
     var shader_vs = gl.createShader(gl.VERTEX_SHADER);
     var shader_frag = gl.createShader(gl.FRAGMENT_SHADER);
@@ -133,23 +137,23 @@ function InitializeShader(gl, source_vs, source_frag)
 
     // Compile vertex shader
     if (!gl.getShaderParameter(shader_vs, gl.COMPILE_STATUS)) {
-        console.log(gl.getShaderInfoLog(shader_vs));
+        ErrorMessage += gl.getShaderInfoLog(shader_vs);
         error = true;
     }
 
     // Compile fragment shader
     if (!gl.getShaderParameter(shader_frag, gl.COMPILE_STATUS)) {
-        console.log(gl.getShaderInfoLog(shader_frag));
+        ErrorMessage += gl.getShaderInfoLog(shader_frag);
         error = true;
     }
 
     // Create shader program consisting of shader pair
     program = gl.createProgram();
 
-    //console.log("program=");
-    //console.log(program);
     var ret = gl.getProgramInfoLog(program);
-    if (ret != "") console.log(ret);
+
+    if (ret != "")
+        ErrorMessage += ret;
 
     // Attach shaders to the program; these methods do not have a return value
     gl.attachShader(program, shader_vs);
@@ -157,17 +161,15 @@ function InitializeShader(gl, source_vs, source_frag)
 
     // Link the program - returns 0 if an error occurs
     if (gl.linkProgram(program) == 0) {
-        console.log("gl.linkProgram(program) failed with error code 0.");
+        ErrorMessage += "\r\ngl.linkProgram(program) failed with error code 0.";
         error = true;
     }
 
-
-
     if (error)  {
-        console.log('Failed to initialize shader.');
+        console.log(ErrorMessage + ' ...failed to initialize shader.');
         return false;
     } else {
-        console.log('Shader successfully created.');
+        console.log(ErrorMessage + ' ...shader successfully created.');
         return program; // Return created program
     }
 }
