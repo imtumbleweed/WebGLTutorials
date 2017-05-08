@@ -10,6 +10,7 @@
     <script src = 'http://www.tigrisgames.com/fx/primitives.js?v=2'></script>
     <script src = 'http://www.tigrisgames.com/fx/texture.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/matrix.js'></script>
+    <script src = 'http://www.tigrisgames.com/fx/ply.js'></script>
     <script type = "text/javascript">
 
         /* -- Gl functions -- */
@@ -108,6 +109,8 @@
             gl.cullFace(gl.BACK);
             //gl.enable(gl.DEPTH_TEST);
             //gl.depthFunc(gl.LESS);
+
+            LoadPLY("racingtrack.ply");
 
             // Start main drawing loop
             var T = setInterval(function() {
