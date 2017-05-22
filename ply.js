@@ -16,8 +16,6 @@ var ReadingPLYData = false;
 // 11 entries per vertex (x,y,z,nx,ny,nz,r,g,b,u,v)
 var PLY_DataLenght = 11;
 
-var VAO_VertexIndex = 0;
-
 var FaceIndex = 0;
 
 // PLY file vertex entry format
@@ -69,6 +67,8 @@ function LoadPLY(filename)
 
                 console.log("PLY number of lines = " + lines.length);
 
+                var idx = 0;
+
                 for (var i = 0; i < lines.length; i++)
                 {
                     if (ReadingPLYData)
@@ -79,6 +79,7 @@ function LoadPLY(filename)
                         if (PLY_index < PLY_Vertices) {
 
                             vertices[PLY_index] = new PLY_Vertex();
+
                             vertices[PLY_index].x = e[0];
                             vertices[PLY_index].y = e[1];
                             vertices[PLY_index].z = e[2];
@@ -87,9 +88,9 @@ function LoadPLY(filename)
                             vertices[PLY_index].nz = e[5];
                             vertices[PLY_index].u = e[6];
                             vertices[PLY_index].v = e[7];
-                            vertices[PLY_index].r = e[8];
-                            vertices[PLY_index].g = e[9];
-                            vertices[PLY_index].b = e[10];
+                            vertices[PLY_index].r = e[8] / 255.0; // convert
+                            vertices[PLY_index].g = e[9] / 255.0; // to 0.0-1.0
+                            vertices[PLY_index].b = e[10] / 255.0; // range
 
                         // Read faces
                         } else {
@@ -97,11 +98,8 @@ function LoadPLY(filename)
                             // Reset index for building VAOs
                             if (PLY_index == PLY_Vertices) {
 
-                                console.log("Resetting Index...");
-
                                 FaceIndex = 0;
 
-                                VAO_VertexIndex = 0;
                             }
 
                             // Wire face data to appropriate vertices
@@ -138,7 +136,7 @@ function LoadPLY(filename)
                                 arrayNormal.push(vertices[c].nz);
 
                                 // colors
-                                arrayColor.push(vertices[a].r);
+                                arrayColor.push(vertices[a].r );
                                 arrayColor.push(vertices[a].g);
                                 arrayColor.push(vertices[a].b);
                                 arrayColor.push(vertices[b].r);
@@ -157,7 +155,11 @@ function LoadPLY(filename)
                                 arrayTexture.push(vertices[c].v);
 
                                 // index
-                                arrayIndex.push(FaceIndex);
+                                arrayIndex.push(idx+0);
+                                arrayIndex.push(idx+1);
+                                arrayIndex.push(idx+2);
+
+                                idx += 3;
                             }
 
                             FaceIndex++;
@@ -207,13 +209,22 @@ function LoadPLY(filename)
                 // We now have both complete vertex and face data loaded;
                 // return everything we loaded as Float32Array & Uint16Array for index
 
-                return [
+                window.ref_arrayMDL = [
                     new Float32Array(arrayVertex),
-                    new Float32Array(arrayNormal),
-                    new Float32Array(arrayTexture),
                     new Float32Array(arrayColor),
+                    new Float32Array(arrayTexture),
+                    new Float32Array(arrayNormal),
                     new Uint16Array(arrayIndex)
                 ];
+
+                // Todo: read list of models in "models" folder and count them.
+                // Todo: if current_model >= total_models set ModelsLoaded to true
+
+                // We are currently only loading one model with this function, so this is sufficient
+                // But needs to be rewritten to test for asynchronous load
+                window.ModelsLoaded = true;
+
+                console.log("All models have finished loading... Ok.");
             }
         }
     };
