@@ -17,6 +17,8 @@
         var canvas = null;
         var gl = null;
 
+
+
         $(document).ready(function() {
 
             var canvas = document.getElementById('gl');
@@ -27,6 +29,10 @@
                 console.log('Failed to set up WebGL.');
 
             else { // Load a shader from "shaders" folder
+
+                // Enable depth test
+                gl.enable(gl.DEPTH_TEST);
+                gl.depthFunc(gl.LESS);
 
                 CreateShadersFromFile( gl );
 

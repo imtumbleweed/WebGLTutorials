@@ -12,6 +12,11 @@
 
 */
 
+// Some tutorials (any tutorial <= index9.php) does not have models yet,
+// But we are already using our most advanced asset loader, implying them
+// So...set as if they are already loaded to avoid halting resource loader at this time
+window.ModelsLoaded = true;
+
 // Get WebGL context, if standard is not available; fall back on alternatives
 function GetWebGLContext( canvas )
 {

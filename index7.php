@@ -38,6 +38,10 @@
 
             else { // Load a shader from "shaders" folder
 
+                // Enable depth test
+                gl.enable(gl.DEPTH_TEST);
+                gl.depthFunc(gl.LESS);
+
                 CreateShadersFromFile( gl );
             }
         });

@@ -10,7 +10,8 @@
     <script src = 'http://www.tigrisgames.com/fx/primitives.js?v=2'></script>
     <script src = 'http://www.tigrisgames.com/fx/texture.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/matrix.js'></script>
-    <script src = 'http://www.tigrisgames.com/fx/ply.js'></script>
+    <script src = 'http://www.tigrisgames.com/fx/ply-racingtrack.js'></script>
+    <script src = 'http://www.tigrisgames.com/fx/model.js?v=1'></script>
     <script type = "text/javascript">
 
         /* -- Gl functions -- */
@@ -29,9 +30,15 @@
 
             else { // Load a shader from "shaders" folder
 
+                // Enable depth test
+                gl.enable(gl.DEPTH_TEST);
+                gl.depthFunc(gl.LESS);
+
                 CreateShadersFromFile( gl );
 
                 LoadTextures();
+
+                LoadModels();
             }
         });
 
@@ -40,17 +47,15 @@
 
             console.log("webGLResourcesLoaded(): All WebGL shaders have finished loading!");
 
-            // Specify triangle vertex data:
-            var vertices = makeCube();
+            var vertices = window.RacingTrack[0]; // Get vertex data from loaded model
 
-            var colors = makeCubeColors();
+            var colors = window.RacingTrack[1];
 
-            var uvs = makeCubeTextures();
+            var uvs = window.RacingTrack[2];
 
-            var indices = [0];
+            // var normals = window.RacingTrack[3]; // unused
 
-            for (var i = 0; i < 36; i++)
-                indices[i] = i;
+            var indices = window.RacingTrack[4];
 
             // Create buffer objects for storing triangle vertex and index data
             var vertexbuffer = gl.createBuffer();
@@ -103,14 +108,12 @@
             var Projection = new CanvasMatrix4();
             var ModelView = new CanvasMatrix4();
 
-            var model_angle = 0;
+            var model_angle = -150;
 
             gl.enable(gl.CULL_FACE);
             gl.cullFace(gl.BACK);
             //gl.enable(gl.DEPTH_TEST);
-            //gl.depthFunc(gl.LESS);
-
-            LoadPLY("racingtrack.ply");
+            //gl.depthFunc(gl.LEQUAL);
 
             // Start main drawing loop
             var T = setInterval(function() {
@@ -118,7 +121,7 @@
                 if (!gl)
                     return;
 
-                model_angle += 0.15;
+                //model_angle += 0.1;//0.000055;
 
                 // Create WebGL canvas
                 gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -127,7 +130,7 @@
 
                 // Set "brick.png" as active texture to pass into the shader
                 gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, brick.texture);
+                gl.bindTexture(gl.TEXTURE_2D, road.texture);
                 gl.uniform1i(gl.getUniformLocation(Shader.textureMapProgram, 'image'), 0);
 
                 // Size of our canvas
@@ -144,14 +147,13 @@
                 // Generate model-view matrix
                 var x=0
                 var y=0;
-                var z=-5;
+                var z=-30;
 
-                var scale = 1.0;
+                var scale = 0.5;
                 ModelView.makeIdentity();
                 ModelView.scale(scale, scale, scale);
-                ModelView.rotate(model_angle, 1, 1, 1);
                 ModelView.rotate(model_angle, 0, 1, 0);
-                ModelView.translate(x, y, z);
+                ModelView.translate(x-2, y-1.9, z);
                 gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "ModelView"), false, ModelView.getAsFloat32Array());
 
                 // Draw triangle

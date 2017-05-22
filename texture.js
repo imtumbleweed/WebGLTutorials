@@ -29,10 +29,10 @@ var Texture = function(fn) {
             that.height = this.height;
 
             gl.bindTexture(gl.TEXTURE_2D, that.texture);
-            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, that.image);
+            gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, that.image);
             gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST);
-            gl.generateMipmap(gl.TEXTURE_2D);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            //gl.generateMipmap(gl.TEXTURE_2D);
             gl.bindTexture(gl.TEXTURE_2D, null);
 
             if (!SilentLoad)
@@ -82,13 +82,21 @@ function LoadTextures() {
                                 // Now check if shaders have finished loading
                                 if (window.ShadersFinishedLoading) {
 
-                                    // Prevent this timer from ticking again after all textures are loaded
-                                    clearInterval(window.Ltimer);
-                                    window.Ltimer = null;
+                                    console.log("window.ShadersFinishedLoading = true");
 
-                                    // Both textures and shaders finished loading;
-                                    // Start main rendering loop
-                                    window.webGLResourcesLoaded();
+                                    // Check if PLY models have finished loading
+                                    if (window.ModelsLoaded) {
+
+                                        console.log("window.ModelsLoaded = true");
+
+                                        // Prevent this timer from ticking again after all textures are loaded
+                                        clearInterval(window.Ltimer);
+                                        window.Ltimer = null;
+
+                                        // Both textures and shaders finished loading;
+                                        // Start main rendering loop
+                                        window.webGLResourcesLoaded();
+                                    }
                                 }
                             }
                         }, 0);
@@ -96,9 +104,10 @@ function LoadTextures() {
 
                     for (var i = 0; i < json.length; i++) {
                         console.log("Loading texture <" + json[i] + ">");
+                        var cache_Bust = new Date().getTime()/1000|0;
                         var appropriateName = json[i].split(".")[0];
                         window.LoadingFileName = json[i];
-                        window[appropriateName] = new Texture("http://localhost/tigrisgames.com/fx/textures/" + window.LoadingFileName);
+                        window[appropriateName] = new Texture("http://localhost/tigrisgames.com/fx/textures/" + window.LoadingFileName + "?v=" + cache_Bust);
                     }
                 }
             } else console.log("*** unable to open <getTextures.php>");
