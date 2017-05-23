@@ -60,13 +60,3 @@ function InitializeKeyboard()
         if (e.keyCode == KEY_D) { key.d = false; }
     });
 }
-
-var key_leftPressed = false;
-setInterval(function() {
-
-   if (key.left && isShift) {
-       // Todo: perform special action when Shift is pressed
-       key_leftPressed = true;
-   }
-
-}, 0);

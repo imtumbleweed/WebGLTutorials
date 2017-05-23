@@ -9,12 +9,13 @@
     <script src = 'http://www.tigrisgames.com/fx/shaders.js?v=5'></script>
     <script src = 'http://www.tigrisgames.com/fx/primitives.js?v=2'></script>
     <script src = 'http://www.tigrisgames.com/fx/texture.js'></script>
+    <script src = 'http://www.tigrisgames.com/fx/vector3.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/matrix.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/ply.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/model.js?v=1'></script>
     <script src = 'http://www.tigrisgames.com/fx/keyboard.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/mouse.js'></script>
-    <script src = 'http://www.tigrisgames.com/fx/vector3.js'></script>
+
     <!--<script src = 'http://www.tigrisgames.com/fx/collision.js'></script>//-->
     <script type = "text/javascript">
 
@@ -134,9 +135,9 @@
 
             // Size of our canvas
             var width = 800;
-            var height = 300;
+            var height = 600;
 
-            $("#gl").css({"width":width+"px","height":height+"px"});
+            $("#gl").css({"width":width+"px","height":height/2+"px"});
 
             // Start main drawing loop
             var T = setInterval(function() {
@@ -178,12 +179,17 @@
                 gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "Projection"), false, Projection.getAsFloat32Array());
 
                 // Generate model-view matrix
-                ModelView.makeIdentity();
-                ModelView.scale(scale, scale, scale);
-                ModelView.rotate(model_angle, 0, 1, 0);
-                ModelView.translate(x-2, y-1.9, z);
+                // ObserverView.makeIdentity();
+                // ObserverView.scale(scale, scale, scale);
 
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "ModelView"), false, ModelView.getAsFloat32Array());
+                //if (typeof ObserverView.lookat2 == 'function')
+                ObserverView.lookat2(0, 0, 0,  // target
+                    0,0,0,  // camera location
+                    0, 1, 0); // up-vector
+
+
+
+                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "ModelView"), false, ObserverView.getAsFloat32Array());
 
                 // Draw triangle
                 gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
@@ -193,8 +199,7 @@
 
 
 
-
-                // Now draw the same scene again from the camera's point of view
+                // Now draw the same scene again from the camera's point of view on our second viewport
                 gl.viewport(width/2, 0, width/2, height);
 
                 // Create camera perspective matrix
@@ -205,17 +210,16 @@
                 //gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "Projection"), false, Projection.getAsFloat32Array());
 
                 // Generate Observer's model-view matrix
-                ObserverView.makeIdentity();
-                ObserverView.scale(scale, scale, scale);
-                ObserverView.rotate(model_angle, 0, 1, 0);
-                ObserverView.translate(x-2, y-1.9, z);
+                ModelView.makeIdentity();
+                ModelView.scale(scale, scale, scale);
+                ModelView.rotate(model_angle, 0, 1, 0);
+                ModelView.translate(x-2, y-1.9, z);
 
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "ObserverView"), false, ModelView.getAsFloat32Array());
+                // Pass ObserverView to the shader
+                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "ModelView"), false, ModelView.getAsFloat32Array());
 
                 // Draw triangle
                 gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-
-
 
             });
         }

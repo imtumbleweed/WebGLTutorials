@@ -562,6 +562,82 @@ CanvasMatrix4.prototype.perspective = function(fovy, aspect, zNear, zFar)
     this.frustum(left, right, bottom, top, zNear, zFar);
 }
 
+// Ensure vector3.js has been previously included
+if (typeof Vector == 'function') {
+    CanvasMatrix4.prototype.lookat2 = function (posx, posy, posz, targetx, targety, targetz, upx, upy, upz) {
+
+        var up = new Vector(upx, upy, upz);
+        var lookat = new Vector(targetx, targety, targetz);
+        var position = new Vector(posx, posy, posz);
+
+        //console.log(up);
+        //console.log(lookat);
+        //console.log(position);
+
+        var vL = lookat.subtract( position ).unit();
+        var f = new Vector(vL.x, vL.y, vL.z);
+
+        var vU = f.cross( up ).unit();
+        var s = new Vector(vU.x, vU.y, vU.z);
+
+        var vF = s.cross( f ).unit();
+        var u = new Vector(vF.x, vF.y, vF.z);
+
+        //console.log(f);
+        //console.log(s);
+        //console.log(u);
+
+        var p = position;
+
+        return new CanvasMatrix4(s.x,          u.x,       -f.x,        0.0,
+                                 s.y,          u.y,       -f.y,        0.0,
+                                 s.z,          u.z,       -f.z,        0.0,
+
+                                 -s.dot(p),   -u.dot(p),   f.dot(p),   1.0);
+
+
+
+        /*
+        var mat4 = new CanvasMatrix4();
+        mat4.m11 = s.x;
+        mat4.m21 = s.y;
+        mat4.m31 = s.z;
+        mat4.m12 = u.x;
+        mat4.m22 = u.y;
+        mat4.m32 = u.z;
+        mat4.m13 = -f.x;
+        mat4.m23 = -f.y;
+        mat4.m33 = -f.z;
+        mat4.m14 = 0.0;
+        mat4.m24 = 0.0;
+        mat4.m34 = 0.0;
+        mat4.m41 = -s.dot( pos );
+        mat4.m42 = -u.dot( pos );
+        mat4.m43 = f.dot( pos );
+        mat4.m44 = 1.0;*/
+
+/*
+        this.m11 = matrix[0];
+        this.m12 = matrix[1];
+        this.m13 = matrix[2];
+        this.m14 = matrix[3];
+        this.m21 = matrix[4];
+        this.m22 = matrix[5];
+        this.m23 = matrix[6];
+        this.m24 = matrix[7];
+        this.m31 = matrix[8];
+        this.m32 = matrix[9];
+        this.m33 = matrix[10];
+        this.m34 = matrix[11];
+        this.m41 = matrix[12];
+        this.m42 = matrix[13];
+        this.m43 = matrix[14];
+        this.m44 = matrix[15];
+
+        */
+    }
+}
+
 CanvasMatrix4.prototype.lookat = function(eyex, eyey, eyez, centerx, centery, centerz, upx, upy, upz)
 {
     var matrix = new CanvasMatrix4();
