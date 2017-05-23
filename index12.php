@@ -9,10 +9,11 @@
     <script src = 'http://www.tigrisgames.com/fx/shaders.js?v=5'></script>
     <script src = 'http://www.tigrisgames.com/fx/primitives.js?v=2'></script>
     <script src = 'http://www.tigrisgames.com/fx/texture.js'></script>
-    <script src = 'http://www.tigrisgames.com/fx/vector3.js'></script>
-    <script src = 'http://www.tigrisgames.com/fx/matrix.js'></script>
-    <script src = 'http://www.tigrisgames.com/fx/ply.js'></script>
-    <script src = 'http://www.tigrisgames.com/fx/model.js?v=1'></script>
+    <script src = 'http://www.tigrisgames.com/fx/vector3.js?v=1'></script>
+    <script src = 'http://www.tigrisgames.com/fx/matrix.js?v=2'></script>
+    <script src = 'http://www.tigrisgames.com/fx/collision.js?v=3'></script>
+    <script src = 'http://www.tigrisgames.com/fx/ply-multi.js?v=1'></script>
+    <script src = 'http://www.tigrisgames.com/fx/model.js?v=4'></script>
     <script src = 'http://www.tigrisgames.com/fx/keyboard.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/mouse.js'></script>
 
@@ -23,6 +24,8 @@
 
         var canvas = null;
         var gl = null;
+
+        var model_indices = null;
 
         $(document).ready(function() {
 
@@ -60,60 +63,9 @@
 
             console.log("webGLResourcesLoaded(): All WebGL shaders have finished loading!");
 
-            var vertices = window.ref_arrayMDL[0]; // Get vertex data from loaded model
+            for (var i = 0; i < 1; i++)
+                BindModel( i );
 
-            var colors = window.ref_arrayMDL[1];
-
-            var uvs = window.ref_arrayMDL[2];
-
-            // var normals = window.RacingTrack[3]; // unused
-
-            var indices = window.ref_arrayMDL[4];
-
-            // Create buffer objects for storing triangle vertex and index data
-            var vertexbuffer = gl.createBuffer();
-            var colorbuffer = gl.createBuffer();
-            var texturebuffer = gl.createBuffer();
-            var indexbuffer = gl.createBuffer();
-
-            var BYTESIZE = vertices.BYTES_PER_ELEMENT;
-
-            // Bind and create enough room for our data on respective buffers
-
-            // Bind vertex buffer to ARRAY_BUFFER
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
-            // Send our vertex data to the buffer using floating point array
-            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-            var coords = gl.getAttribLocation(Shader.textureMapProgram, "a_Position");
-            gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(coords); // Enable it
-            // We're done; now we have to unbind the buffer
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-            // Bind colorbuffer to ARRAY_BUFFER
-            gl.bindBuffer(gl.ARRAY_BUFFER, colorbuffer);
-            // Send our vertex data to the buffer using floating point array
-            gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
-            var col = gl.getAttribLocation(Shader.textureMapProgram, "a_Color");
-            gl.vertexAttribPointer(col, 3, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(col); // Enable it
-            // We're done; now we have to unbind the buffer
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-            // Bind texturebuffer to ARRAY_BUFFER
-            gl.bindBuffer(gl.ARRAY_BUFFER, texturebuffer);
-            // Send our texture image data to the buffer using floating point array
-            gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
-            var uv = gl.getAttribLocation(Shader.textureMapProgram, "a_Texture");
-            gl.vertexAttribPointer(uv, 2, gl.FLOAT, false, 0, 0);
-            gl.enableVertexAttribArray(uv); // Enable it
-            // We're done; now we have to unbind the buffer (optional but probably a good idea)
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-            // Bind indices to ELEMENT_ARRAY_BUFFER
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
-            // Send index (indices) data to this buffer
-            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
             // Use our standard shader program for rendering this triangle
             gl.useProgram( Shader.textureMapProgram );
 
@@ -123,15 +75,6 @@
             var ObserverView = new CanvasMatrix4();
 
             var model_angle = -150;
-
-            gl.enable(gl.CULL_FACE);
-            gl.cullFace(gl.BACK);
-            //gl.enable(gl.DEPTH_TEST);
-            //gl.depthFunc(gl.LEQUAL);
-
-            // Initialize keyboard controls
-            InitializeKeyboard();
-            InitializeMouse();
 
             // Size of our canvas
             var width = 800;
@@ -144,7 +87,6 @@
 
                 if (!gl)
                     return;
-
 
                 if (key.left) x -= 0.01;
                 if (key.right) x += 0.01;
@@ -164,10 +106,8 @@
                 gl.bindTexture(gl.TEXTURE_2D, road.texture);
                 gl.uniform1i(gl.getUniformLocation(Shader.textureMapProgram, 'image'), 0);
 
-
-
-
-
+                // Indices of cube
+               // var indices_cube = window.ref_arrayMDL[1][4];
 
                 // Set viewport for displaying camera
                 gl.viewport(0, 0, width/2, height);
@@ -179,22 +119,21 @@
                 gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "Projection"), false, Projection.getAsFloat32Array());
 
                 // Generate model-view matrix
-                // ObserverView.makeIdentity();
-                // ObserverView.scale(scale, scale, scale);
-
-                //if (typeof ObserverView.lookat2 == 'function')
-                ObserverView.lookat2(0, 0, 0,  // target
-                    0,0,0,  // camera location
+                ObserverView.makeIdentity();
+                ObserverView.scale(scale, scale, scale);
+                ObserverView.lookat2(x, y, z,  // target
+                    1, 1, 0,  // camera location
                     0, 1, 0); // up-vector
-
-
 
                 gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "ModelView"), false, ObserverView.getAsFloat32Array());
 
-                // Draw triangle
-                gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+                // Draw racing track
+                BindModel(1);
+                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
 
-
+                // Draw cube
+                BindModel(0);
+                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
 
 
 
@@ -219,7 +158,15 @@
                 gl.uniformMatrix4fv(gl.getUniformLocation(Shader.textureMapProgram, "ModelView"), false, ModelView.getAsFloat32Array());
 
                 // Draw triangle
-                gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
+
+                // Draw racing track
+                BindModel(1);
+                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
+
+                // Draw cube
+                BindModel(0);
+                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
 
             });
         }
