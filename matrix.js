@@ -570,10 +570,6 @@ if (typeof Vector == 'function') {
         var lookat = new Vector(targetx, targety, targetz);
         var position = new Vector(posx, posy, posz);
 
-        //console.log(up);
-        //console.log(lookat);
-        //console.log(position);
-
         var vL = lookat.subtract( position ).unit();
         var f = new Vector(vL.x, vL.y, vL.z);
 
@@ -583,23 +579,35 @@ if (typeof Vector == 'function') {
         var vF = s.cross( f ).unit();
         var u = new Vector(vF.x, vF.y, vF.z);
 
-        //console.log(f);
-        //console.log(s);
-        //console.log(u);
+        this.m11 = s.x;
+        this.m21 = s.y;
+        this.m31 = s.z;
+        this.m12 = u.x;
+        this.m22 = u.y;
+        this.m32 = u.z;
+        this.m13 = -f.x;
+        this.m23 = -f.y;
+        this.m33 = -f.z;
+        this.m14 = 0.0;
+        this.m24 = 0.0;
+        this.m34 = 0.0;
+        this.m41 = -s.dot( position );
+        this.m42 = -u.dot( position );
+        this.m43 = f.dot( position );
+        this.m44 = 1.0;
 
-        var p = position;
-
-        return new CanvasMatrix4(s.x,          u.x,       -f.x,        0.0,
+/*
+        var mat = new CanvasMatrix4(s.x,          u.x,       -f.x,        0.0,
                                  s.y,          u.y,       -f.y,        0.0,
                                  s.z,          u.z,       -f.z,        0.0,
+                                 -s.dot(p),   -u.dot(p),   f.dot(p),   1.0); */
 
-                                 -s.dot(p),   -u.dot(p),   f.dot(p),   1.0);
+        //this.matrix = mat;
 
 
 
-        /*
-        var mat4 = new CanvasMatrix4();
-        mat4.m11 = s.x;
+/*
+        this.m11 = s.x;
         mat4.m21 = s.y;
         mat4.m31 = s.z;
         mat4.m12 = u.x;
@@ -614,7 +622,9 @@ if (typeof Vector == 'function') {
         mat4.m41 = -s.dot( pos );
         mat4.m42 = -u.dot( pos );
         mat4.m43 = f.dot( pos );
-        mat4.m44 = 1.0;*/
+        mat4.m44 = 1.0; */
+
+
 
 /*
         this.m11 = matrix[0];
