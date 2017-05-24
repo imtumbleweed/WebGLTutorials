@@ -570,14 +570,14 @@ if (typeof Vector == 'function') {
         var lookat = new Vector(targetx, targety, targetz);
         var position = new Vector(posx, posy, posz);
 
-        var vL = lookat.subtract( position ).unit();
-        var f = new Vector(vL.x, vL.y, vL.z);
+        var L = lookat.subtract( position ).unit();
+        var f = new Vector(L.x, L.y, L.z);
 
-        var vU = f.cross( up ).unit();
-        var s = new Vector(vU.x, vU.y, vU.z);
+        var U = f.cross( up ).unit();
+        var s = new Vector(U.x, U.y, U.z);
 
-        var vF = s.cross( f ).unit();
-        var u = new Vector(vF.x, vF.y, vF.z);
+        var F = s.cross( f ).unit();
+        var u = new Vector(F.x, F.y, F.z);
 
         this.m11 = s.x;
         this.m21 = s.y;
@@ -593,7 +593,7 @@ if (typeof Vector == 'function') {
         this.m34 = 0.0;
         this.m41 = -s.dot( position );
         this.m42 = -u.dot( position );
-        this.m43 = f.dot( position );
+        this.m43 = -f.dot( position );
         this.m44 = 1.0;
 
 /*

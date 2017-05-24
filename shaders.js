@@ -21,6 +21,8 @@ class ShaderProgramManager { // Globally available shader programs
         this.globalDrawingProgram = null;       // Draw point defined by global parameters
         this.vertexColorProgram = null;            // Draw static point in the middle
         this.textureProgram = null;
+        this.lightProgram = null;
+        this.moveProgram = null;
     }
 }
 
@@ -42,17 +44,25 @@ function CreateShaderPrograms(gl) {
 }
 
 var shaders = [ // Enumerate shader filenames
-    "standard",         // this assumes "standard.vs" & "standard.frag" are available in "shaders" directory
-    "global",           // this assumes "global.vs" & "global.frag" are available in "shaders" directory
+    "standard", // this assumes "standard.vs" & "standard.frag" are available in "shaders" directory
+    "global",   // this assumes "global.vs" & "global.frag" are available in "shaders" directory
     "vertex",
-    "texture"
+    "texture",
+    "move",
+    "light",
+    "directional",
+    "point"
 ];
 
 var shader_name = [ // Enumerate shader program names
     "standardProgram",
     "globalDrawingProgram",
     "vertexColorProgram",
-    "textureMapProgram"
+    "textureMapProgram",
+    "moveProgram",
+    "lightProgram",
+    "directionalProgram", // directional light
+    "pointProgram" // point light
 ];
 
 // Scroll through the list, loading shader pairs

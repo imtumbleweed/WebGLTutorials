@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Tutorial 12 - 3D Camera</title>
+    <title>Tutorial 12 - 3D Camera & Multiple Viewport</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <script src = 'http://www.tigrisgames.com/js/jquery.js' type = 'text/javascript'></script>
     <script src = 'http://www.tigrisgames.com/js/ui.js' type = 'text/javascript'></script>
@@ -120,7 +120,6 @@
 
                 // Generate model-view matrix
                 ObserverView.makeIdentity();
-                ObserverView.scale(scale, scale, scale);
                 ObserverView.lookat2(x, y, z,  // target
                     1, 1, 0,  // camera location
                     0, 1, 0); // up-vector
@@ -133,8 +132,7 @@
 
                 // Draw cube
                 BindModel(0);
-                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
-
+                gl.drawElements(gl.LINES, model_indices.length, gl.UNSIGNED_SHORT, 0);
 
 
 

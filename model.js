@@ -20,8 +20,8 @@ for (var i = 0; i < MAX_MODELS; i++)
 
 function LoadModels()
 {
-    LoadPLY("cube.ply");
-    LoadPLY("racingtrack2.ply");
+    LoadPLY("car.ply");
+    // LoadPLY("racingtrack2.ply");
 }
 
 // Bind model for rasterization;

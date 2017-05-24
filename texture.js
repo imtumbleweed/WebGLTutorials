@@ -1,3 +1,5 @@
+var url = "http://localhost/tigrisgames.com";
+
 window.ResourceId = 0;
 window.TotalTextures = 0;
 window.Ltimer = null;
@@ -107,7 +109,7 @@ function LoadTextures() {
                         var cache_Bust = new Date().getTime()/1000|0;
                         var appropriateName = json[i].split(".")[0];
                         window.LoadingFileName = json[i];
-                        window[appropriateName] = new Texture("http://localhost/tigrisgames.com/fx/textures/" + window.LoadingFileName + "?v=" + cache_Bust);
+                        window[appropriateName] = new Texture(url + "/fx/textures/" + window.LoadingFileName + "?v=" + cache_Bust);
                     }
                 }
             } else console.log("*** unable to open <getTextures.php>");
