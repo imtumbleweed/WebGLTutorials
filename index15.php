@@ -125,18 +125,19 @@
 
                 // Generate view matrix
                 View.makeIdentity();
-                View.translate(0, -0.5, -2);
+                View.translate(0, -0.25, -1);
 
-                car_angle += 1;
+                car_angle += 0.5;
 
                 // Set viewport to Upper Left corner
                 gl.viewport(0, 0, width, height);
 
                 // Default ambient color set to "white"
-                rgb = [1.0, 1.0, 1.0];
+                rgb = [1.0, 1.0, 0.7];
 
                 LightPosition = [5, 3, -10]; // some angle
-                LightDirection = [x, y, 1]; // some other angle
+                LightDirection = [x, 0.75, 1]; // some other angle
+                LightColor = [1, 1, 0.9]; // white-yellowish
 
                 Model.makeIdentity();
                 Model.rotate(car_angle, 0, 1, 0);
@@ -145,6 +146,7 @@
                 gl.uniform3fv(gl.getUniformLocation(Shader.directionalProgram, "rgb"), rgb);
                 gl.uniform3fv(gl.getUniformLocation(Shader.directionalProgram, "LightPosition"), LightPosition);
                 gl.uniform3fv(gl.getUniformLocation(Shader.directionalProgram, "LightDirection"), LightDirection);
+                gl.uniform3fv(gl.getUniformLocation(Shader.directionalProgram, "LightColor"), LightColor);
 
                 gl.uniformMatrix4fv(gl.getUniformLocation(Shader.directionalProgram, "Model"), false, Model.getAsFloat32Array());
                 gl.uniformMatrix4fv(gl.getUniformLocation(Shader.directionalProgram, "View"), false, View.getAsFloat32Array());
