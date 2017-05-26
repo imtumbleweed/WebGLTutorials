@@ -22,11 +22,11 @@ void main()
 
     vec3 normal = normalize(vec3(a_Normal));
 
-    float NdotL = max(dot(LightDirection, normal), 0.0);
+    float NdotL = max(dot(LightDirection, normal), 1.0);
 
-    vec3 diffuse = vec3(0.5, 0.5, 0.5);
+    vec4 diffuse = vec4(0.7, 0.7, 0.85, 0.4);
 
-    color = a_Color * vec4(LightColor, 1) * NdotL;
+    color = diffuse * a_Color * vec4(LightColor, 1) * NdotL;
 
     texture = a_Texture;
 }
