@@ -571,13 +571,13 @@ if (typeof Vector == 'function') {
         var position = new Vector(posx, posy, posz);
 
         var L = lookat.subtract( position ).unit();
-        var f = new Vector(L.x, L.y, L.z);
+        var f = new Vector(L.x, L.y, L.z).unit();
 
-        var U = f.cross( up ).unit();
-        var s = new Vector(U.x, U.y, U.z);
+        var U = f.cross( up );
+        var s = new Vector(U.x, U.y, U.z).unit();
 
-        var F = s.cross( f ).unit();
-        var u = new Vector(F.x, F.y, F.z);
+        var F = s.cross( f );
+        var u = new Vector(F.x, F.y, F.z).unit();
 
         this.m11 = s.x;
         this.m21 = s.y;
@@ -593,7 +593,7 @@ if (typeof Vector == 'function') {
         this.m34 = 0.0;
         this.m41 = -s.dot( position );
         this.m42 = -u.dot( position );
-        this.m43 = -f.dot( position );
+        this.m43 = f.dot( position );
         this.m44 = 1.0;
 
 /*
