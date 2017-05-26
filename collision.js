@@ -4,13 +4,17 @@ function triangle_intersection(
     V1, V2, V3, // Triangle vertices
     O,// Ray origin
     D // Ray direction
-    )
-{
-    var e1, e2;  // Edge1, Edge2
-    var P, Q, T;
+    ) {
 
-    var det, inv_det = 0.0, u, v;
-    var t;
+    var e1 = new Vector(),
+        e2 = new Vector();
+
+    var  P = new Vector(),
+         Q = new Vector(),
+         T = new Vector();
+
+    var det = 0, inv_det = 0.0, u = 0, v = 0;
+    var t = 0;
 
     //Find vectors for two edges sharing V1
     e1 = V2.subtract(V1);
@@ -55,7 +59,7 @@ function triangle_intersection(
         var z = (w * V1.z + u * V2.z + v * V3.z);
 
         // return intersection point
-        return [x, y, z];
+        return [x,y,z];
     }
 
     // No collision
