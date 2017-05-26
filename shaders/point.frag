@@ -13,5 +13,5 @@ uniform vec3 rgb;
 
 void main() {
 
-    gl_FragColor = vec4(rgb[0], rgb[1], rgb[2], 1) * texture2D(image, vec2(texture.s, texture.t));
+    gl_FragColor = color * texture2D(image, vec2(texture.s, texture.t));
 }
