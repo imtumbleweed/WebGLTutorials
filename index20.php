@@ -69,7 +69,7 @@
                 BindModel( i );
 
             // Use our standard shader program for rendering this triangle
-            gl.useProgram( Shader.spriteProgram );
+            gl.useProgram( Shader.spritesheetProgram );
 
             // Create storage for our matrices
             var Projection = new CanvasMatrix4();
@@ -86,6 +86,18 @@
             var height = 600;
 
             $("#gl").css( { "width" : width + "px", "height" : height + "px" } );
+
+            function i2xy(index, mapWidth)
+            {
+                var x = index % mapWidth;
+                var y = Math.floor(index/mapWidth);
+                return [x, y];
+            }
+
+            function xy2i(x, y, mapWidth)
+            {
+                return y * mapWidth + x;
+            }
 
             // Start main drawing loop
             var T = setInterval(function() {
@@ -110,8 +122,8 @@
 
                 // Set "brick.png" as active texture to pass into the shader
                 gl.activeTexture(gl.TEXTURE0);
-                gl.bindTexture(gl.TEXTURE_2D, star.texture);
-                gl.uniform1i(gl.getUniformLocation(Shader.spriteProgram, 'image'), 0);
+                gl.bindTexture(gl.TEXTURE_2D, font.texture);
+                gl.uniform1i(gl.getUniformLocation(Shader.spritesheetProgram, 'image'), 0);
 
                 // Indices of cube
                 // var indices_cube = window.ref_arrayMDL[1][4];
@@ -121,12 +133,12 @@
                 Projection.perspective(45, width / height, 0.05, 1000);
                 //Projection.ortho(0, 0, 100, 100, -100, 100);
 
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spriteProgram, "Projection"), false, Projection.getAsFloat32Array());
+                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spritesheetProgram, "Projection"), false, Projection.getAsFloat32Array());
 
                 var View = new CanvasMatrix4();
 
                 View.makeIdentity();
-                View.translate(0, -0.25, -10);
+                View.translate(0, 0, -10);
 
                 // Set viewport to Upper Left corner
                 gl.viewport(0, 0, width, height);
@@ -140,24 +152,43 @@
 
                 BindModel(0);
 
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spriteProgram, "View"), false, View.getAsFloat32Array());
+                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spritesheetProgram, "View"), false, View.getAsFloat32Array());
 
-                Model.makeIdentity();
-                Model.rotate(xx + yy, 0, 1, 0);
+                // Which sprite from the spritesheet to display?
+                var column = 0.0;
+                var row = 1.0;
 
-                var rx = -10 + Math.random() * 20;
-                var ry = -10 + Math.random() * 20;
+                // sprite sheet grid is 16x16
+                var sheet_size = 16.0;
 
-                Model.translate(rx, ry, 0);
+                // sprite dimension is 16x16
+                var sprite_size = 16.0;
 
-                Model.scale(0.5, 0.5, 0.5);
+                var gl_text = "Hello from WebGL Text Engine!";
 
-                Model.rotate(Math.random() * 360, 0, 0, 1);
+                for (var i = 0; i < gl_text.length; i++)
+                {
+                    Model.makeIdentity();
+                    Model.rotate(180, 0, 0, 1);
+                    Model.rotate(180, 1, 0, 0);
+                    Model.translate(1.5 * i, 0, 0);
+                    Model.scale(0.1, 0.1, 0.1);
 
-                gl.uniform3fv(gl.getUniformLocation(Shader.spriteProgram, "rgb"), rgb);
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spriteProgram, "Model"), false, Model.getAsFloat32Array());
+                    var c = gl_text.charCodeAt(i);
 
-                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
+                    var ascii = i2xy(c, 16);
+
+                    column = ascii[0];
+                    row = ascii[1];
+
+                    gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spritesheetProgram, "Model"), false, Model.getAsFloat32Array());
+                    gl.uniform3fv(gl.getUniformLocation(Shader.spritesheetProgram, "rgb"), rgb);
+                    gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "column"), column);
+                    gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "row"), row);
+                    gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "sheet_size"), sheet_size);
+                    gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "sprite_size"), sprite_size);
+                    gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
+                }
             });
         }
 
