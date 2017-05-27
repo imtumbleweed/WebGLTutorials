@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Tutorial 14 - Per-Vertex Point-Light Light Source Shader</title>
+    <title>Tutorial 18 - Per-Vertex Point-Light Light Source Shader</title>
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
     <script src = 'http://www.tigrisgames.com/js/jquery.js' type = 'text/javascript'></script>
     <script src = 'http://www.tigrisgames.com/js/ui.js' type = 'text/javascript'></script>
