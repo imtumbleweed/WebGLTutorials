@@ -13,11 +13,10 @@
     <script src = 'http://www.tigrisgames.com/fx/matrix.js?v=2'></script>
     <script src = 'http://www.tigrisgames.com/fx/collision.js?v=3'></script>
     <script src = 'http://www.tigrisgames.com/fx/ply-multi.js?v=1'></script>
-    <script src = 'http://www.tigrisgames.com/fx/model5.js?v=5'></script>
+    <script src = 'http://www.tigrisgames.com/fx/model6.js?v=1'></script>
     <script src = 'http://www.tigrisgames.com/fx/keyboard.js'></script>
     <script src = 'http://www.tigrisgames.com/fx/mouse.js'></script>
-
-    <!--<script src = 'http://www.tigrisgames.com/fx/collision.js'></script>//-->
+    <script src = 'http://www.tigrisgames.com/fx/segment.js'></script>
     <script type = "text/javascript">
 
         /* -- Gl functions -- */
@@ -69,7 +68,7 @@
                 BindModel( i );
 
             // Use our standard shader program for rendering this triangle
-            gl.useProgram( Shader.spritesheetProgram );
+            gl.useProgram( Shader.vertexColorProgram );
 
             // Create storage for our matrices
             var Projection = new CanvasMatrix4();
@@ -101,6 +100,10 @@
 
             var flame_index = 0;
 
+            InitializeMouse();
+
+            window.Mouse.Initialize("#gl");
+
             // Start main drawing loop
             var T = setInterval(function() {
 
@@ -125,7 +128,7 @@
                 // Set "brick.png" as active texture to pass into the shader
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, fire.texture);
-                gl.uniform1i(gl.getUniformLocation(Shader.spritesheetProgram, 'image'), 0);
+                gl.uniform1i(gl.getUniformLocation(Shader.vertexColorProgram, 'image'), 0);
 
                 // Indices of cube
                 // var indices_cube = window.ref_arrayMDL[1][4];
@@ -135,7 +138,7 @@
                 Projection.perspective(45, width / height, 0.05, 1000);
                 //Projection.ortho(0, 0, 100, 100, -100, 100);
 
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spritesheetProgram, "Projection"), false, Projection.getAsFloat32Array());
+                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.vertexColorProgram, "Projection"), false, Projection.getAsFloat32Array());
 
                 var View = new CanvasMatrix4();
 
@@ -152,44 +155,102 @@
                 LightDirection = [0,-1,0]; // some other angle
                 LightColor = [1, 1, 1]; // white-yellowish
 
+                console.log(Mouse.x);
+
+                // Define our line segments
+                var segmentA = new Segment(-0.5*10, -0.5*10,  1.0*10, 1.0*10 + (Mouse.x * 0.01)*10);
+                var segmentB = new Segment( 0.5*10, -0.75*10, -1.0*10, 1.0*10);
+
+                var ix = 0;
+                var iy = y;
+
+                // Get intersection point (if any)
+                if (segmentA.intersect(segmentB) == DO_INTERSECT)
+                {
+                    ix = window.int_x/1000;
+                    iy = window.int_y/1000;
+                }
+                else
+                {
+                    // Segments do not intersect
+                }
+
+                var dir = ang2vec(player_angle);
+                var dirx = dir.x;
+                var diry = dir.y;
+
+                // Bind sphere model
                 BindModel(0);
 
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spritesheetProgram, "View"), false, View.getAsFloat32Array());
-
-                // Which sprite from the spritesheet to display?
-                var column = 0.0;
-                var row = 1.0;
-
-                // sprite sheet grid is 16x16
-                var sheet_size = 8.0;
-
-                // sprite dimension is 16x16
-                var sprite_size = 128.0;
+                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.vertexColorProgram, "View"), false, View.getAsFloat32Array());
 
                 Model.makeIdentity();
-                Model.rotate(180, 0, 0, 1);
-                Model.rotate(180, 1, 0, 0);
-                Model.translate(0, 0, 0);
-                //Model.scale(0.1, 0.1, 0.1);
+                Model.translate(ix, iy, 0);
+                Model.scale(0.1, 0.1, 0.1);
 
-                // Rewind animation
-                if (flame_index >= 59)
-                    flame_index = 0;
+                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.vertexColorProgram, "Model"), false, Model.getAsFloat32Array());
+                gl.uniform3fv(gl.getUniformLocation(Shader.vertexColorProgram, "rgb"), rgb);
+                gl.drawElements(gl.LINES, model_indices.length, gl.UNSIGNED_SHORT, 0);
 
-                var c = flame_index++;
+                // Draw line segments
 
-                var ascii = i2xy(flame_index, 16);
+                // Specify triangle vertex data:
+                var vertices = new Float32Array([
+                    segmentA.x, segmentA.y, 0,
+                    segmentA.x + segmentA.vecx, segmentA.y + segmentA.vecy, 0,
+                    segmentB.x, segmentB.y, 0,
+                    segmentB.x + segmentB.vecx, segmentB.y + segmentB.vecy, 0
+                ]);
 
-                column = ascii[0];
-                row = ascii[1];
+                var colors = new Float32Array([
 
-                gl.uniformMatrix4fv(gl.getUniformLocation(Shader.spritesheetProgram, "Model"), false, Model.getAsFloat32Array());
-                gl.uniform3fv(gl.getUniformLocation(Shader.spritesheetProgram, "rgb"), rgb);
-                gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "column"), column);
-                gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "row"), row);
-                gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "sheet_size"), sheet_size);
-                gl.uniform1f(gl.getUniformLocation(Shader.spritesheetProgram, "sprite_size"), sprite_size);
-                gl.drawElements(gl.TRIANGLES, model_indices.length, gl.UNSIGNED_SHORT, 0);
+                    1.0, 0.0, 0.0,
+                    1.0, 1.0, 0.0,
+                    0.0, 0.0, 1.0,
+                    0.0, 1.0, 1.0,
+                ]);
+
+                var indices = [0, 1, 2, 3];
+
+                // Create buffer objects for storing triangle vertex and index data
+                var vertexbuffer = gl.createBuffer();
+                var colorbuffer = gl.createBuffer();
+                var indexbuffer = gl.createBuffer();
+
+                var BYTESIZE = vertices.BYTES_PER_ELEMENT;
+
+                // Bind and create enough room for our data on respective buffers
+
+                // Bind it to ARRAY_BUFFER
+                gl.bindBuffer(gl.ARRAY_BUFFER, vertexbuffer);
+                // Send our vertex data to the buffer using floating point array
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+                var coords = gl.getAttribLocation(Shader.vertexColorProgram, "a_Position");
+                gl.vertexAttribPointer(coords, 3, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(coords); // Enable it
+                // We're done; now we have to unbind the buffer
+                gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+                // Bind it to ARRAY_BUFFER
+                gl.bindBuffer(gl.ARRAY_BUFFER, colorbuffer);
+                // Send our vertex data to the buffer using floating point array
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+                var colors = gl.getAttribLocation(Shader.vertexColorProgram, "a_Color");
+                gl.vertexAttribPointer(colors, 3, gl.FLOAT, false, 0, 0);
+                gl.enableVertexAttribArray(colors); // Enable it
+                // We're done; now we have to unbind the buffer
+                gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+                // Bind it to ELEMENT_ARRAY_BUFFER
+                gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexbuffer);
+                // Send index (indices) data to this buffer
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(indices), gl.STATIC_DRAW);
+
+                // Use our standard shader program for rendering this triangle
+                gl.useProgram( Shader.vertexColorProgram );
+
+                // Draw triangle
+                gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
 
             }, 24);
         }
