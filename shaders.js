@@ -52,7 +52,8 @@ var shaders = [ // Enumerate shader filenames
     "light",
     "directional",
     "point",
-    "sprite"
+    "sprite",
+    "spritesheet"
 ];
 
 var shader_name = [ // Enumerate shader program names
@@ -63,8 +64,9 @@ var shader_name = [ // Enumerate shader program names
     "moveProgram",
     "lightProgram",
     "directionalProgram", // directional light
-    "pointProgram", // point light
-    "spriteProgram"
+    "pointProgram",       // point light
+    "spriteProgram",
+    "spritesheetProgram"
 ];
 
 // Scroll through the list, loading shader pairs
