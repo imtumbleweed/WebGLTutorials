@@ -97,7 +97,7 @@ function LoadShader(gl, shaderName, filenameVertexShader, filenameFragmentShader
                                 window.webGLResourcesLoaded();
                         }
                 };
-                xmlhttp2.open("GET", filename_vs, true);
+                xmlhttp2.open("GET", filename_fs, true);
                 xmlhttp2.send();
             }
         }
